@@ -1,5 +1,6 @@
 # Sentiment-analysis-with-AI-Thesis
 This repository contains my codes and experiments associated with my master thesis. I will develop a sentiment analysis investment strategy using natural language processing, thanks to machine learning techniques.
+The databased comes from Kaggle: https://www.kaggle.com/kazanova/sentiment140 and is renamed "Sentiment140.csv" as input of the model.
 
 I currently created a twitter analyzer with a multi-layer perceptron that uses Bidirectional GRU hidden layers.
 
