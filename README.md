@@ -10,4 +10,5 @@ The files:
 - glove.6B.100d.txt
 - glove.6B.200d.txt
 - glove.6B.300d.txt
+
 Should be put in the same folder/directory for use. The hyperparameter "embedding_dim" in twitter_sentiment_GRU.py defines which embeddings dimensions we want to use, therefore it can only take the values 50, 100, 200 or 300.
