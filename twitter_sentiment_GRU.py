@@ -104,7 +104,7 @@ model.add(Bidirectional(GRU(hidden_layer_size, kernel_regularizer=regularizers.l
 model.add(Dropout(dropout))
 model.add(Bidirectional(GRU(hidden_layer_size, kernel_regularizer=regularizers.l1_l2(l1=l1,l2=l2),
                             kernel_initializer='uniform', dropout=dropout, recurrent_dropout=dropout,
-                            return_sequences=True, activation='relu')))
+                            return_sequences=False, activation='relu')))
 model.add(Dropout(dropout))
 model.add(Dense(2, activation='softmax'))
 
