@@ -51,7 +51,7 @@ df = df[['text','sentiment']]
 
 #Preprocessing
 df['text'] = df['text'].apply(pp.process)
-tokenizer = Tokenizer(num_words=max_sequence_length)
+tokenizer = Tokenizer(num_words=vocab_size)
 tokenizer.fit_on_texts(df.text)
 sequences = tokenizer.texts_to_sequences(df.text)
 #print(sequences)
