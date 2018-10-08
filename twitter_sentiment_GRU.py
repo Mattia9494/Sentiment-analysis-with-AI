@@ -4,6 +4,7 @@ import numpy as np
 import os
 import matplotlib
 matplotlib.use('TkAgg')
+import preprocessing as pp
 from sklearn.preprocessing import MinMaxScaler
 from timeit import default_timer as timer
 from datetime import timedelta
@@ -47,26 +48,23 @@ df = df[df.sentiment != 2]
 df['sentiment'] = df['sentiment'].map({0: 0, 4: 1})
 df = df.drop(['id', 'date', 'q', 'user'], axis=1)
 df = df[['text','sentiment']]
+
 #Preprocessing
+df['text'] = df['text'].apply(pp.process)
 tokenizer = Tokenizer(num_words=max_sequence_length)
-
-
-
 tokenizer.fit_on_texts(df.text)
 sequences = tokenizer.texts_to_sequences(df.text)
 #print(sequences)
 word_index = tokenizer.word_index
 #print("word index =", word_index)
 print('Found %s unique tokens.' % len(word_index))
-
 preprocessed_text = pad_sequences(sequences, maxlen=max_sequence_length)
 labels = df.sentiment
 labels = to_categorical(np.asarray(labels))
 print('Shape of data tensor:', preprocessed_text.shape)
 print('Shape of label tensor:', labels.shape)
-#print(labels)
-#print(preprocessed_text)
 
+# Split the data into training and validation set
 x_train, x_val, y_train, y_val = train_test_split(preprocessed_text, labels, test_size=validation_split, shuffle=False)
 
 # Normalize
