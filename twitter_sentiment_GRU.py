@@ -4,6 +4,7 @@ import numpy as np
 import os
 import matplotlib
 matplotlib.use('TkAgg')
+from sklearn.preprocessing import MinMaxScaler
 from timeit import default_timer as timer
 from datetime import timedelta
 import matplotlib.pyplot as plt
@@ -69,10 +70,13 @@ print('Shape of label tensor:', labels.shape)
 x_train, x_val, y_train, y_val = train_test_split(preprocessed_text, labels, test_size=validation_split, shuffle=False)
 
 # Normalize
-x_train = x_train / 255.0
-x_val = x_val / 255.0
+print('Normalizing...')
+scaler = MinMaxScaler()
+x_train = scaler.fit_transform(np.array(x_train))
+x_val = scaler.fit_transform(np.array(x_val))
+print('Normalization completed!')
 
-
+# Implement GloVe
 embeddings_index = {}
 f = open(os.path.join(GloVe_Dir, 'glove.6B.{}d.txt'.format(embedding_dim)))
 for line in f:
@@ -91,11 +95,11 @@ for word, i in word_index.items():
         # words not found in embedding index will be all-zeros.
         embedding_matrix[i] = embedding_vector
 
+# Build the model
 print('Build model...')
 model = Sequential()
 # Load pre-trained word embeddings into an Embedding layer
 # Note: we set "trainable = False" so as to keep the embeddings fixed
-
 model.add(Embedding(len(word_index) + 1, embedding_dim, weights=[embedding_matrix],
                     input_length=max_sequence_length, trainable=False))
 model.add(Bidirectional(GRU(hidden_layer_size, kernel_regularizer=regularizers.l1_l2(l1=l1,l2=l2),
