@@ -34,11 +34,12 @@ start_train= '2008-08-08'
 end_train = '2014-12-31'
 start_val = '2015-01-02'
 end_val = '2016-07-01'
+patience = 1
 verbose = 1
 Base_Dir = ''
 Weights_Name = 'DJIA_weights1.hdf5'
 Model_Name = 'DJIA_model1.h5'
-Stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=1, verbose=1, mode='auto')
+Stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=patience, verbose=verbose, mode='auto')
 Checkpointer = ModelCheckpoint(filepath=os.path.join(Base_Dir,Weights_Name), verbose=verbose, save_best_only=True)
 max_sequence_length = 400
 vocab_size = 10000
