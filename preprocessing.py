@@ -1,7 +1,8 @@
 # coding=utf-8
 import re
+import nltk
 
-# helper function to clean data using regular expressions
+# helper function to clean data
 def process(data):
     # Remove HTML special entities (e.g. &amp;)
     data = re.sub(r'\&\w*;', '', data)
@@ -15,12 +16,28 @@ def process(data):
     data = re.sub(r'https?:\/\/.*\/\w*', '', data)
     # Remove hashtags
     data = re.sub(r'#\w*', '', data)
-    # Remove words with 2 or fewer letters
-    data = re.sub(r'\b\w{1,2}\b', '', data)
+    # Remove everything which is not alphanumeric
+    data = re.sub(r'[^\w]', ' ', data)
+    # Remove all numbers
+    data = re.sub(r'[0-9]+', '', data)
     # Remove whitespace (including new line characters)
     data = re.sub(r'\s\s+', ' ', data)
     # Remove single space remaining at the front of the data.
     data = data.lstrip(' ')
     # Remove characters beyond Basic Multilingual Plane (BMP) of Unicode:
     data = ''.join(c for c in data if c <= '\uFFFF')
+    # Correct words with
+    data = re.sub(r'(.)\1+', r'\1\1', data)
+    # Remove words with 2 or fewer letters
+    data = re.sub(r'\b\w{1,2}\b', '', data)
+    # Remove other elements
+    data = re.sub('\n', '', data)
+    data = re.sub('"b', '', data)
+    data = re.sub("'b", '', data)
     return data
+
+
+tokenizer = nltk.tokenize.WhitespaceTokenizer()
+lemmatizer = nltk.stem.WordNetLemmatizer()
+def lemmatize_text(text):
+   return [lemmatizer.lemmatize(w) for w in tokenizer.tokenize(text)]
