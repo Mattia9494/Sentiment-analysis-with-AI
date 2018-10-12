@@ -13,7 +13,7 @@ from nltk.corpus import stopwords
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.models import Sequential
-from keras.layers import Dense, ELU, GRU, Dropout, BatchNormalization
+from keras.layers import Dense, ELU, GRU, Dropout, BatchNormalization, LSTM
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.layers.embeddings import Embedding
 import matplotlib
@@ -38,7 +38,7 @@ verbose = 1
 Base_Dir = ''
 Weights_Name = 'DJIA_weights1.hdf5'
 Model_Name = 'DJIA_model1.h5'
-Stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=3, verbose=1, mode='auto')
+Stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=1, verbose=1, mode='auto')
 Checkpointer = ModelCheckpoint(filepath=os.path.join(Base_Dir,Weights_Name), verbose=verbose, save_best_only=True)
 max_sequence_length = 400
 vocab_size = 10000
@@ -53,13 +53,13 @@ num_epochs = 20
 learning_rate = 0.001
 
 #read csv file
-djia = pd.read_csv("Combined_News_DJIA.csv")
+DJIA = pd.read_csv("Combined_News_DJIA.csv")
 
 #create training and testing dataframe on 80 % and 20 % respectively
-Training_dataframe = djia[(djia['Date']>=start_train) & (djia['Date']<=end_train)]
-Testing_dataframe = djia[(djia['Date']>=start_val) & (djia['Date']<=end_val)]
+Training_dataframe = DJIA[(DJIA['Date']>=start_train) & (DJIA['Date']<=end_train)]
+Testing_dataframe = DJIA[(DJIA['Date']>=start_val) & (DJIA['Date']<=end_val)]
 
-attrib = djia.columns.values
+attrib = DJIA.columns.values
 
 x_train = Training_dataframe.loc[:,attrib[2:len(attrib)]]
 y_train = Training_dataframe.iloc[:,1]
@@ -118,11 +118,11 @@ x_test_sequence = pad_sequences(x_test_sequence, maxlen=max_sequence_length)
 # ===============
 model = Sequential()
 model.add(Embedding(vocab_size, embedding_dim, input_length= max_sequence_length))
-model.add(GRU(hidden_layer_size, recurrent_dropout=recurrent_dropout, return_sequences=True))
+model.add(LSTM(hidden_layer_size, recurrent_dropout=recurrent_dropout, return_sequences=True))
 model.add(BatchNormalization())
 model.add(ELU(alpha=1.0))
 model.add(Dropout(dropout))
-model.add(GRU(hidden_layer_size, recurrent_dropout=recurrent_dropout, return_sequences=False))
+model.add(LSTM(hidden_layer_size, recurrent_dropout=recurrent_dropout, return_sequences=False))
 model.add(BatchNormalization())
 model.add(ELU(alpha=1.0))
 model.add(Dropout(dropout))
