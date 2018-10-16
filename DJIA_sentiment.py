@@ -9,13 +9,15 @@ import pandas as pd
 import re
 import os
 from string import punctuation
+from keras import metrics
+from keras import regularizers
+from keras.utils import to_categorical
 from nltk.corpus import stopwords
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.models import Sequential
-from keras.layers import Dense, ELU, GRU, Dropout, BatchNormalization, LSTM
+from keras.layers import Dense, ELU, GRU, Dropout, BatchNormalization, LSTM, Activation, Embedding, PReLU
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-from keras.layers.embeddings import Embedding
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
@@ -40,18 +42,17 @@ Base_Dir = ''
 Weights_Name = 'DJIA_weights1.hdf5'
 Model_Name = 'DJIA_model1.h5'
 Stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=patience, verbose=verbose, mode='auto')
-Checkpointer = ModelCheckpoint(filepath=os.path.join(Base_Dir,Weights_Name), verbose=verbose, save_best_only=True)
-max_sequence_length = 400
-vocab_size = 10000
-embedding_dim = 128
+Checkpointer = ModelCheckpoint(filepath=os.path.join(Base_Dir, Weights_Name), verbose=verbose, save_best_only=True)
+max_sequence_length = 100
+vocab_size = 3000
+embedding_dim = 256
 hidden_layer_size = 256
-dropout = 0.2
-recurrent_dropout = 0.5
+dropout = 0.3
+recurrent_dropout = 0.3
 l1 = 0.01
-l2 = 0.01
-batch_size = 32
+l2 = 0.001
+batch_size = 64
 num_epochs = 20
-learning_rate = 0.001
 
 #read csv file
 DJIA = pd.read_csv("Combined_News_DJIA.csv")
@@ -67,6 +68,9 @@ y_train = Training_dataframe.iloc[:,1]
 
 x_test = Testing_dataframe.loc[:,attrib[2:len(attrib)]]
 y_test = Testing_dataframe.iloc[:,1]
+
+y_train = to_categorical(y_train)
+y_test = to_categorical(y_test)
 
 # merge the 25 news together to form a single signal
 merged_x_train = x_train.apply(lambda x: ''.join(str(x.values)), axis=1)
@@ -119,16 +123,11 @@ x_test_sequence = pad_sequences(x_test_sequence, maxlen=max_sequence_length)
 # ===============
 model = Sequential()
 model.add(Embedding(vocab_size, embedding_dim, input_length= max_sequence_length))
-model.add(LSTM(hidden_layer_size, recurrent_dropout=recurrent_dropout, return_sequences=True))
-model.add(BatchNormalization())
-model.add(ELU(alpha=1.0))
-model.add(Dropout(dropout))
 model.add(LSTM(hidden_layer_size, recurrent_dropout=recurrent_dropout, return_sequences=False))
-model.add(BatchNormalization())
-model.add(ELU(alpha=1.0))
+model.add(ELU())
 model.add(Dropout(dropout))
-model.add(Dense(1, activation='sigmoid'))
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+model.add(Dense(2, activation='softmax'))
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=["categorical_accuracy"])
 model.summary()
 
 # Fit the model and evaluate
@@ -145,8 +144,8 @@ print('Test accuracy:', acc)
 # ===============
 plt.subplot(211)
 plt.title("accuracy")
-plt.plot(history.history["acc"], color="r", label="train")
-plt.plot(history.history["val_acc"], color="b", label="validation")
+plt.plot(history.history["categorical_accuracy"], color="r", label="train")
+plt.plot(history.history["val_categorical_accuracy"], color="b", label="validation")
 plt.legend(loc="best")
 plt.subplot(212)
 plt.title("loss")
