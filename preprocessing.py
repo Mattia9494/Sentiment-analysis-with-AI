@@ -1,6 +1,5 @@
 # coding=utf-8
 import re
-import nltk
 
 # helper function to clean data
 def process(data):
@@ -36,8 +35,3 @@ def process(data):
     data = re.sub("'b", '', data)
     return data
 
-
-tokenizer = nltk.tokenize.WhitespaceTokenizer()
-lemmatizer = nltk.stem.WordNetLemmatizer()
-def lemmatize_text(text):
-   return [lemmatizer.lemmatize(w) for w in tokenizer.tokenize(text)]
