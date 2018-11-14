@@ -39,8 +39,8 @@ end_val = '2016-07-01'
 patience = 1
 verbose = 1
 Base_Dir = ''
-Weights_Name = 'DJIA_weights1.hdf5'
-Model_Name = 'DJIA_model1.h5'
+Weights_Name = 'DJIA_weights.hdf5'
+Model_Name = 'DJIA_model.h5'
 Stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=patience, verbose=verbose, mode='auto')
 Checkpointer = ModelCheckpoint(filepath=os.path.join(Base_Dir, Weights_Name), verbose=verbose, save_best_only=True)
 max_sequence_length = 100
@@ -52,7 +52,7 @@ recurrent_dropout = 0.3
 l1 = 0.01
 l2 = 0.001
 batch_size = 64
-num_epochs = 20
+num_epochs = 3
 
 #read csv file
 DJIA = pd.read_csv("Combined_News_DJIA.csv")
@@ -127,7 +127,7 @@ model.add(LSTM(hidden_layer_size, recurrent_dropout=recurrent_dropout, return_se
 model.add(ELU())
 model.add(Dropout(dropout))
 model.add(Dense(2, activation='softmax'))
-model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=["categorical_accuracy"])
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=["binary_accuracy"])
 model.summary()
 
 # Fit the model and evaluate
@@ -144,8 +144,8 @@ print('Test accuracy:', acc)
 # ===============
 plt.subplot(211)
 plt.title("accuracy")
-plt.plot(history.history["categorical_accuracy"], color="r", label="train")
-plt.plot(history.history["val_categorical_accuracy"], color="b", label="validation")
+plt.plot(history.history["binary_accuracy"], color="r", label="train")
+plt.plot(history.history["val_binary_accuracy"], color="b", label="validation")
 plt.legend(loc="best")
 plt.subplot(212)
 plt.title("loss")
