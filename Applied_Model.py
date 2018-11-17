@@ -23,7 +23,7 @@ news_aggregate = news_aggregate_macron
 news_aggregate = djia.tokenizer.texts_to_sequences(news_aggregate)
 #padding the string to have exactly the same shape as the model input
 news_aggregate = pad_sequences(news_aggregate, maxlen=djia.max_sequence_length, dtype='object')
-print(news_aggregate)
+#print(news_aggregate)
 sentiment = model.predict(news_aggregate,batch_size=1,verbose = 2)[0]
 if(np.argmax(sentiment) == 0):
     print("negative sentiment")
