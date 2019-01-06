@@ -1,33 +1,41 @@
+import numpy as np
+import tensorflow as tf
+import random as rn
+# The below is necessary for starting Numpy generated random numbers
+# in a well-defined initial state.
+np.random.seed(1)
+
+# The below is necessary for starting core Python generated random numbers
+# in a well-defined state.
+rn.seed(2)
+
+# Force TensorFlow to use single thread.
+# Multiple threads are a potential source of non-reproducible results.
+session_conf = tf.ConfigProto(intra_op_parallelism_threads=1,
+                              inter_op_parallelism_threads=1)
+from keras import backend as K
+tf.set_random_seed(2)
+sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
+K.set_session(sess)
+
 #importing libraries
 import preprocessing as pp
 from timeit import default_timer as timer
 from datetime import timedelta
-from tensorflow import set_random_seed
-from numpy.random import seed
-import numpy as np
 import pandas as pd
-import re
 import os
-from string import punctuation
-from keras import metrics
-from keras import regularizers
 from keras.utils import to_categorical
-from nltk.corpus import stopwords
+from keras.initializers import Zeros, Ones, RandomNormal, RandomUniform, TruncatedNormal, VarianceScaling, Orthogonal, Identity, lecun_uniform, glorot_normal, glorot_uniform, he_normal
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.models import Sequential
-from keras.layers import Dense, ELU, GRU, Dropout, BatchNormalization, LSTM, Activation, Embedding, PReLU
+from keras.layers import Dense, ELU, GRU, Dropout, BatchNormalization, LSTM, Activation, Embedding, PReLU, GlobalMaxPool1D, Flatten
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 import matplotlib
 matplotlib.use('TkAgg')
-import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix
 
 #start the times
 start = timer()
-#set the seed to obtain reproducible results
-seed(1)
-set_random_seed(2)
 
 # ===============
 # Hyperparameters
@@ -36,7 +44,7 @@ start_train= '2008-08-08'
 end_train = '2014-12-31'
 start_val = '2015-01-02'
 end_val = '2016-07-01'
-patience = 1
+patience = 3
 verbose = 1
 Base_Dir = ''
 Weights_Name = 'DJIA_weights.hdf5'
@@ -52,7 +60,7 @@ recurrent_dropout = 0.3
 l1 = 0.01
 l2 = 0.001
 batch_size = 64
-num_epochs = 3
+num_epochs = 5
 
 #read csv file
 DJIA = pd.read_csv("Combined_News_DJIA.csv")
@@ -87,7 +95,7 @@ train_without_sw=[]
 test_without_sw=[]
 train_temporary=list(merged_x_train)
 test_temporary=list(merged_x_test)
-s=set(stopwords.words('english'))
+s=pp.stopwords
 for i in train_temporary:
     f=i.split(' ')
     for j in f:
