@@ -5,4 +5,6 @@ The "Combined_News_DJIA.csv" comes from this link: https://www.kaggle.com/aaron7
 
 preprocessing.py contains all the formulas used to preprocess the current text.
 
+Applied_model.py is used to test the validity of the model with some days characterized by the presence of breaking news in the world due to main historical or political events, such as the Trump election.
+
 All the other files are provisory at the moment since the work is still in prograss.
