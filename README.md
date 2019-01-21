@@ -2,7 +2,7 @@
 This repository contains the codes and experiments associated with my master thesis. The project consists in the development of an investment strategy using sentiment analysis on the Dow Jones through deep learning techniques.
 
 The project has been implemented in two versions of a similar model, that are discerned by the use of two different databases:
-- The first database is the "Combined_News_DJIA.csv". It comes from this Kaggle link: https://www.kaggle.com/aaron7sun/stocknews
+- The first database is the "Combined_News_DJIA.csv". It comes from this Kaggle file: https://www.kaggle.com/aaron7sun/stocknews
 and works as input for the DJIA_sentiment.py AI model. Let's first explore the composition of the DJIA dataset:
   1. A first column of dates from 08-08-2008 to 01-07-2016 for a total of 1989 lines.
   2. A second column of human-tagged labels, in which:
