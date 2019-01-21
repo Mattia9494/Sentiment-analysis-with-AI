@@ -20,6 +20,6 @@ All those cases were "today's open price" did not have a respective "tomorrow cl
 
 - preprocessing.py contains all the formulas that have been used in both models for used to preprocess the current text.
 
-- Applied_model.py is used to test the validity of the model with some days characterized by the presence of breaking news in the world due to main historical or political events, such as the Trump election.
+- Applied_model.py is used to test the validity of the model with some days characterized by the presence of international breaking news due to main historical or political events, such as the Trump election.
 
 All the other files are provisory at the moment since the work is still in progress.
