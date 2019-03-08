@@ -49,21 +49,21 @@ end_val = '2016-07-01'
 patience = 3
 verbose = 1
 Base_Dir = ''
-Weights_Name = 'DJIA_weights_plus4.hdf5'
-Model_Name = 'DJIA_model_plus4.h5'
+Weights_Name = 'DJIA_weights_plus1B.hdf5'
+Model_Name = 'DJIA_model_plus1B.h5'
 Stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=patience, verbose=verbose, mode='auto')
 Checkpointer = ModelCheckpoint(filepath=os.path.join(Base_Dir, Weights_Name), verbose=verbose, save_best_only=True)
 max_sequence_length = 110
 vocab_size = 3000
-embedding_dim = 512
-hidden_layer_size = 256
-dropout = 0.5
-recurrent_dropout = 0.3
+embedding_dim = 32
+hidden_layer_size = 128
+dropout = 0
+recurrent_dropout = 0.1
 batch_size = 64
-num_epochs = 3
+num_epochs = 2
 
 #read csv file
-DJIA = pd.read_csv("Combined_News_DJIA_plus4.csv", usecols=['Date', 'Label','Top1', 'Top2', 'Top3', 'Top4', 'Top5',
+DJIA = pd.read_csv("Combined_News_DJIA_plus1B.csv", usecols=['Date', 'Label','Top1', 'Top2', 'Top3', 'Top4', 'Top5',
        'Top6', 'Top7', 'Top8', 'Top9', 'Top10', 'Top11', 'Top12', 'Top13',
        'Top14', 'Top15', 'Top16', 'Top17', 'Top18', 'Top19', 'Top20', 'Top21',
        'Top22', 'Top23', 'Top24', 'Top25'])
@@ -124,8 +124,8 @@ merged_x_test=test_without_sw
 # tokenize and create sequences
 tokenizer = Tokenizer(num_words=vocab_size)
 tokenizer.fit_on_texts(merged_x_train)
-x_train_sequence= tokenizer.texts_to_sequences(merged_x_train)
-x_test_sequence= tokenizer.texts_to_sequences(merged_x_test)
+x_train_sequence = tokenizer.texts_to_sequences(merged_x_train)
+x_test_sequence = tokenizer.texts_to_sequences(merged_x_test)
 
 word_index = tokenizer.word_index
 input_dim = len(word_index) + 1
@@ -175,6 +175,10 @@ print('Test accuracy:', acc)
 #plt.legend(loc="best")
 #plt.tight_layout()
 #plt.show()
+
+# Visualize Model Structure
+#from keras.utils import plot_model
+#plot_model(model, to_file='model0.png')
 
 # Save the model
 model.save(Model_Name)

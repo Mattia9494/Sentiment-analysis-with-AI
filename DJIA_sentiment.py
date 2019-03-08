@@ -25,11 +25,13 @@ from datetime import timedelta
 import pandas as pd
 import os
 from keras.utils import to_categorical
-from keras.initializers import Zeros, Ones, RandomNormal, RandomUniform, TruncatedNormal, VarianceScaling, Orthogonal, Identity, lecun_uniform, glorot_normal, glorot_uniform, he_normal
+import keras.regularizers
+from keras.constraints import MinMaxNorm, UnitNorm, NonNeg, MaxNorm
+from keras.initializers import Zeros, Ones, RandomNormal, RandomUniform, TruncatedNormal, VarianceScaling, Orthogonal, Identity, lecun_uniform, glorot_normal, glorot_uniform, he_uniform, he_normal
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.models import Sequential
-from keras.layers import Dense, ELU, GRU, Dropout, BatchNormalization, LSTM, Activation, Embedding, PReLU, GlobalMaxPool1D, Flatten
+from keras.layers import Dense, ELU, GRU, AlphaDropout, Dropout, BatchNormalization, LSTM, Activation, Embedding, PReLU, GlobalMaxPool1D, Flatten
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 import matplotlib
 matplotlib.use('TkAgg')
@@ -44,26 +46,28 @@ start_train= '2008-08-08'
 end_train = '2014-12-31'
 start_val = '2015-01-02'
 end_val = '2016-07-01'
-patience = 3
+patience = 2
 verbose = 1
 Base_Dir = ''
-Weights_Name = 'DJIA_weights.hdf5'
-Model_Name = 'DJIA_model.h5'
+Weights_Name = 'DJIA_weights0.hdf5'
+Model_Name = 'DJIA_model0.h5'
 Stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=patience, verbose=verbose, mode='auto')
 Checkpointer = ModelCheckpoint(filepath=os.path.join(Base_Dir, Weights_Name), verbose=verbose, save_best_only=True)
-max_sequence_length = 100
+max_sequence_length = 110
 vocab_size = 3000
 embedding_dim = 256
 hidden_layer_size = 256
 dropout = 0.3
 recurrent_dropout = 0.3
-l1 = 0.01
-l2 = 0.001
 batch_size = 64
-num_epochs = 5
+num_epochs = 2
+
 
 #read csv file
-DJIA = pd.read_csv("Combined_News_DJIA.csv")
+DJIA = pd.read_csv("Combined_News_DJIA.csv", usecols=['Date', 'Label','Top1', 'Top2', 'Top3', 'Top4', 'Top5',
+       'Top6', 'Top7', 'Top8', 'Top9', 'Top10', 'Top11', 'Top12', 'Top13',
+       'Top14', 'Top15', 'Top16', 'Top17', 'Top18', 'Top19', 'Top20', 'Top21',
+       'Top22', 'Top23', 'Top24', 'Top25'])
 
 #create training and testing dataframe on 80 % and 20 % respectively
 Training_dataframe = DJIA[(DJIA['Date']>=start_train) & (DJIA['Date']<=end_train)]
@@ -90,12 +94,13 @@ merged_x_test = x_test.apply(lambda x: ''.join(str(x.values)), axis=1)
 merged_x_train = merged_x_train.apply(lambda x: pp.process(x))
 merged_x_test = merged_x_test.apply(lambda x: pp.process(x))
 
+
 # remove stopwords in the training and testing set
 train_without_sw=[]
 test_without_sw=[]
 train_temporary=list(merged_x_train)
 test_temporary=list(merged_x_test)
-s=pp.stopwords
+s=pp.stop_words
 for i in train_temporary:
     f=i.split(' ')
     for j in f:
@@ -123,17 +128,25 @@ tokenizer = Tokenizer(num_words=vocab_size)
 tokenizer.fit_on_texts(merged_x_train)
 x_train_sequence= tokenizer.texts_to_sequences(merged_x_train)
 x_test_sequence= tokenizer.texts_to_sequences(merged_x_test)
+
+word_index = tokenizer.word_index
+input_dim = len(word_index) + 1
+print('Found %s unique tokens.' % len(word_index))
+
 x_train_sequence = pad_sequences(x_train_sequence, maxlen=max_sequence_length)
 x_test_sequence = pad_sequences(x_test_sequence, maxlen=max_sequence_length)
+
+print('Shape of training tensor:', x_train_sequence.shape)
+print(x_train_sequence)
+print('Shape of testing tensor:', x_test_sequence.shape)
+print(x_test_sequence)
 
 # ===============
 # Model creation
 # ===============
 model = Sequential()
-model.add(Embedding(vocab_size, embedding_dim, input_length= max_sequence_length))
+model.add(Embedding(vocab_size, embedding_dim, input_length = max_sequence_length, mask_zero=True))
 model.add(LSTM(hidden_layer_size, recurrent_dropout=recurrent_dropout, return_sequences=False))
-model.add(ELU())
-model.add(Dropout(dropout))
 model.add(Dense(2, activation='softmax'))
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=["binary_accuracy"])
 model.summary()
@@ -162,6 +175,10 @@ print('Test accuracy:', acc)
 #plt.legend(loc="best")
 #plt.tight_layout()
 #plt.show()
+
+# Visualize Model Structure
+#from keras.utils import plot_model
+#plot_model(model, to_file='model0.png')
 
 # Save the model
 model.save(Model_Name)

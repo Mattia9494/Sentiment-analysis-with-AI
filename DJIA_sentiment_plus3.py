@@ -55,14 +55,12 @@ Stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=patience, ver
 Checkpointer = ModelCheckpoint(filepath=os.path.join(Base_Dir, Weights_Name), verbose=verbose, save_best_only=True)
 max_sequence_length = 110
 vocab_size = 3000
-embedding_dim = 256
+embedding_dim = 128
 hidden_layer_size = 256
 dropout = 0.3
 recurrent_dropout = 0.3
-batch_size = 64
-num_epochs = 3
-l1 = 0.0001
-l2 = 0.0001
+batch_size = 32
+num_epochs = 4
 
 
 #read csv file
@@ -97,8 +95,33 @@ merged_x_test = x_test.apply(lambda x: ''.join(str(x.values)), axis=1)
 merged_x_train = merged_x_train.apply(lambda x: pp.process(x))
 merged_x_test = merged_x_test.apply(lambda x: pp.process(x))
 
-merged_x_train = merged_x_train.apply(lambda x: pp.remove_stop_words(x))
-merged_x_test = merged_x_test.apply(lambda x: pp.remove_stop_words(x))
+# remove stopwords in the training and testing set
+train_without_sw=[]
+test_without_sw=[]
+train_temporary=list(merged_x_train)
+test_temporary=list(merged_x_test)
+s=pp.stop_words
+for i in train_temporary:
+    f=i.split(' ')
+    for j in f:
+        if j in s:
+            f.remove(j)
+    s1=""
+    for k in f:
+        s1+=k+" "
+    train_without_sw.append(s1)
+merged_x_train=train_without_sw
+
+for i in test_temporary:
+    f=i.split(' ')
+    for j in f:
+        if j in s:
+            f.remove(j)
+    s1=""
+    for k in f:
+        s1+=k+" "
+    test_without_sw.append(s1)
+merged_x_test=test_without_sw
 
 # tokenize and create sequences
 tokenizer = Tokenizer(num_words=vocab_size)

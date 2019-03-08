@@ -55,15 +55,12 @@ Stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=patience, ver
 Checkpointer = ModelCheckpoint(filepath=os.path.join(Base_Dir, Weights_Name), verbose=verbose, save_best_only=True)
 max_sequence_length = 110
 vocab_size = 3000
-embedding_dim = 256
-hidden_layer_size = 256
+embedding_dim = 128
+hidden_layer_size = 64
 dropout = 0.3
-recurrent_dropout = 0.3
+recurrent_dropout = 0.1
 batch_size = 64
-num_epochs = 3
-l1 = 0.0001
-l2 = 0.0001
-
+num_epochs = 2
 
 #read csv file
 DJIA = pd.read_csv("Combined_News_DJIA_plus1.csv", usecols=['Date', 'Label','Top1', 'Top2', 'Top3', 'Top4', 'Top5',
@@ -96,20 +93,39 @@ merged_x_test = x_test.apply(lambda x: ''.join(str(x.values)), axis=1)
 merged_x_train = merged_x_train.apply(lambda x: pp.process(x))
 merged_x_test = merged_x_test.apply(lambda x: pp.process(x))
 
-# ===============
-# pre-process
-# ===============
-merged_x_train = merged_x_train.apply(lambda x: pp.process(x))
-merged_x_test = merged_x_test.apply(lambda x: pp.process(x))
+# remove stopwords in the training and testing set
+train_without_sw=[]
+test_without_sw=[]
+train_temporary=list(merged_x_train)
+test_temporary=list(merged_x_test)
+s=pp.stop_words
+for i in train_temporary:
+    f=i.split(' ')
+    for j in f:
+        if j in s:
+            f.remove(j)
+    s1=""
+    for k in f:
+        s1+=k+" "
+    train_without_sw.append(s1)
+merged_x_train=train_without_sw
 
-merged_x_train = merged_x_train.apply(lambda x: pp.remove_stop_words(x))
-merged_x_test = merged_x_test.apply(lambda x: pp.remove_stop_words(x))
+for i in test_temporary:
+    f=i.split(' ')
+    for j in f:
+        if j in s:
+            f.remove(j)
+    s1=""
+    for k in f:
+        s1+=k+" "
+    test_without_sw.append(s1)
+merged_x_test=test_without_sw
 
 # tokenize and create sequences
 tokenizer = Tokenizer(num_words=vocab_size)
 tokenizer.fit_on_texts(merged_x_train)
-x_train_sequence= tokenizer.texts_to_sequences(merged_x_train)
-x_test_sequence= tokenizer.texts_to_sequences(merged_x_test)
+x_train_sequence = tokenizer.texts_to_sequences(merged_x_train)
+x_test_sequence = tokenizer.texts_to_sequences(merged_x_test)
 
 word_index = tokenizer.word_index
 input_dim = len(word_index) + 1
@@ -159,6 +175,10 @@ print('Test accuracy:', acc)
 #plt.legend(loc="best")
 #plt.tight_layout()
 #plt.show()
+
+# Visualize Model Structure
+#from keras.utils import plot_model
+#plot_model(model, to_file='model0.png')
 
 # Save the model
 model.save(Model_Name)
