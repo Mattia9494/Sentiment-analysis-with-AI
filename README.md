@@ -1,4 +1,4 @@
-# Natural Language Processing for Trading Signals using Deep Learning
+# Overview of the thesis and code content
 
 This thesis aims at investigating if and to what point it is possible to trade on sentiment
 and if Artificial Intelligence (AI) would be the best way to do so.
